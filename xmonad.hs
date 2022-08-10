@@ -16,30 +16,56 @@ import XMonad.Hooks.DynamicLog
 import System.IO
 import XMonad.Actions.SinkAll
 import XMonad.Actions.CopyWindow
-
-myLayouts = avoidStruts (smartSpacing 2 (smartBorders (tiled)))
+import XMonad.Hooks.UrgencyHook
+import XMonad.Actions.WindowBringer
+import XMonad.Hooks.EwmhDesktops
+myLayouts = tiled
   where
      tiled   = Tall nmaster delta ratio
      nmaster = 1
      ratio   = 1/2
      delta   = 3/100
 
+
+myTitleColor = "white" -- color of window title
+myTitleLength = 80 -- truncate window title to this length
+myCurrentWSColor = "#14bbd8" -- color of active workspace
+myVisibleWSColor = "white" -- color of inactive workspace
+myUrgentWSColor = "red" -- color of workspace with 'urgent' window
+myHiddenNoWindowsWSColor = "white"
+
+
+
+--WORKSPACES
+xmobarEscape = concatMap doubleLts
+    where doubleLts '<' = "<"
+          doubleLts x = [x]
+
+myWorkspaces :: [String]
+myWorkspaces = clickable . (map xmobarEscape) $ ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    where
+               clickable l = [ "<action=xdotool key super+" ++ show (n) ++ ">" ++ ws ++ "</action>" | (i,ws) <- zip [1, 2, 3, 4, 5, 6, 7, 8, 9] l, let n = i ]
+
 myKeys :: [([Char], X ())]
 myKeys =
   -- Commands
-    [ ("M-<Return>",     spawn $ "alacritty")
+    [ ("M-<Return>",     spawn $ "st")
     , ("M-q",            kill)
     , ("M--"  ,          spawn "pamixer --allow-boost -d 5")
     , ("M-=",            spawn "pamixer --allow-boost -i 5")
     , ("M-p", unGrab *>  spawn "rofi -show run")
-    , ("<Print>",        spawn $ "cd ~/Pictures/Screenshots && import $(date '+%y%m%d-%H%M-%S').png")
+    --, ("<Print>",        spawn $ "cd ~/Pictures/Screenshots && import $(date '+%y%m%d-%H%M-%S').png")
+    , ("<Print>",        spawn $ "~/scripts/screenshot.sh")
     , ("<Scroll_Lock>",  spawn $ "~/cfgs/scripts/video.sh")
     , ("<Pause>",        spawn $ "~/cfgs/scripts/video.sh end")
-    , ("M-c",            spawn "CM_HISTLENGTH=999999 CM_LAUNCHER=dmenu clipmenu")
-    , ("M-d",            spawn "dolphin")
+    , ("M-c",            spawn "alacritty -e ~/scripts/clipboard.sh")
+    , ("M-S-<Return>",   spawn "pcmanfm")
+    , ("M-s",            spawn "firefox")
     , ("M-e e",          spawn $ "emacsclient -c -e \"(set-frame-parameter (selected-frame) 'alpha-background 0.85)\"")
     -- From Imported Libraries
     , ("M-b",            sendMessage ToggleStruts)
+    , ("M-f",            gotoMenu)
+    , ("M-C-f",          bringMenu)        
     , ("M-S-=",          incWindowSpacing 4)
     , ("M-S--",          decWindowSpacing 4)
     , ("M-S-.",          shiftToNext)
@@ -48,31 +74,36 @@ myKeys =
     , ("M-.",            DO.moveTo Next HiddenNonEmptyWS)    
     , ("M-m",            dwmpromote)
     , ("M-S-f",          sinkAll)
-    , ("M-s",            windows copyToAll)    
     ]
 
 main :: IO ()
 main = do
     xmproc <- spawnPipe  "xmobar"
-    xmonad $ fullscreenSupport $ docks $ def
-      { layoutHook      = myLayouts
+    xmonad $ ewmhFullscreen $ ewmh $ docks $ def
+      { layoutHook      =    smartSpacing 2 $ avoidStruts $ smartBorders $ myLayouts
       , focusedBorderColor = myFocusedBorderColor
-      , borderWidth     = myBorderWidth
+      , borderWidth     =    myBorderWidth
       , normalBorderColor =  myNormalBorderColor
-      , handleEventHook = fullscreenEventHook
-      , manageHook      = fullscreenManageHook
-      , modMask         = mod4Mask
-      , logHook = dynamicLogWithPP $ xmobarPP
+      , workspaces      =    myWorkspaces
+      , manageHook      =    composeAll
+                            [ className =? "TrayCalendar" --> doIgnore
+                            , className =? "Galculator" --> doFloat ]
+
+      , modMask         =    mod4Mask
+      , logHook         =    dynamicLogWithPP $ xmobarPP
       
-                { ppOutput  = hPutStrLn xmproc
-                , ppTitle   = xmobarColor "white" "" . shorten 100
-                , ppSep     = xmobarColor "grey" "" " | "
-                , ppCurrent = xmobarColor "#00989b" "" . wrap "<" ">"
-                , ppHidden  = xmobarColor "#44689b" ""
-                , ppHiddenNoWindows = xmobarColor "white" ""
-                , ppLayout          = const ""
+                            { ppOutput  = hPutStrLn xmproc
+                            , ppTitle   = xmobarColor "white" "" . shorten 35
+                            , ppCurrent = xmobarColor myCurrentWSColor "" . wrap "<fc=#14bbd8><</fc>"">"
+                            , ppVisible = xmobarColor myVisibleWSColor "" . wrap """"
+                            , ppHidden  = wrap """"
+                            , ppHiddenNoWindows = xmobarColor myHiddenNoWindowsWSColor ""
+                            , ppUrgent  = xmobarColor myUrgentWSColor ""
+                            , ppSep = "  "
+                            , ppWsSep = "  "                
+                            , ppLayout = const "<fc=#bc1fFF>|</fc>"
 }               } `additionalKeysP` myKeys
 
-myBorderWidth = 2
-myFocusedBorderColor = "red"
-myNormalBorderColor = "#44689b"
+myBorderWidth = 3
+myFocusedBorderColor = "#1f0fc8"
+myNormalBorderColor = "grey"
