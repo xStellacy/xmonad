@@ -19,6 +19,10 @@ import XMonad.Actions.CopyWindow
 import XMonad.Hooks.UrgencyHook
 import XMonad.Actions.WindowBringer
 import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.SetWMName
+import qualified XMonad.StackSet as W
+import XMonad.Hooks.ManageHelpers
+
 myLayouts = tiled
   where
      tiled   = Tall nmaster delta ratio
@@ -27,11 +31,11 @@ myLayouts = tiled
      delta   = 3/100
 
 
-myTitleColor = "white" -- color of window title
-myTitleLength = 80 -- truncate window title to this length
+myTitleColor     = "white" -- color of window title
+myTitleLength    = 80 -- truncate window title to this length
 myCurrentWSColor = "#14bbd8" -- color of active workspace
 myVisibleWSColor = "white" -- color of inactive workspace
-myUrgentWSColor = "red" -- color of workspace with 'urgent' window
+myUrgentWSColor  = "red" -- color of workspace with 'urgent' window
 myHiddenNoWindowsWSColor = "white"
 
 
@@ -82,12 +86,16 @@ main = do
     xmonad $ ewmhFullscreen $ ewmh $ docks $ def
       { layoutHook      =    smartSpacing 2 $ avoidStruts $ smartBorders $ myLayouts
       , focusedBorderColor = myFocusedBorderColor
+      , startupHook = setWMName "LG3D"
       , borderWidth     =    myBorderWidth
       , normalBorderColor =  myNormalBorderColor
       , workspaces      =    myWorkspaces
       , manageHook      =    composeAll
                             [ className =? "TrayCalendar" --> doIgnore
-                            , className =? "Galculator" --> doFloat ]
+                            , className =? "Galculator" --> doFloat
+                            , role =? "page-info" --> doFloat
+                            , role =? "GtkFileChooserDialog" --> doSink
+                            ]
 
       , modMask         =    mod4Mask
       , logHook         =    dynamicLogWithPP $ xmobarPP
@@ -103,6 +111,7 @@ main = do
                             , ppWsSep = "  "                
                             , ppLayout = const "<fc=#bc1fFF>|</fc>"
 }               } `additionalKeysP` myKeys
+                        where role = stringProperty "WM_WINDOW_ROLE"
 
 myBorderWidth = 3
 myFocusedBorderColor = "#1f0fc8"
