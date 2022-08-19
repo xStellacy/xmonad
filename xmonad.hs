@@ -58,14 +58,15 @@ myKeys =
     , ("M--"  ,          spawn "pamixer --allow-boost -d 5")
     , ("M-=",            spawn "pamixer --allow-boost -i 5")
     , ("M-p", unGrab *>  spawn "rofi -show run")
-    --, ("<Print>",        spawn $ "cd ~/Pictures/Screenshots && import $(date '+%y%m%d-%H%M-%S').png")
     , ("<Print>",        spawn $ "~/scripts/screenshot.sh")
-    , ("<Scroll_Lock>",  spawn $ "~/cfgs/scripts/video.sh")
-    , ("<Pause>",        spawn $ "~/cfgs/scripts/video.sh end")
     , ("M-c",            spawn "alacritty -e ~/scripts/clipboard.sh")
     , ("M-S-<Return>",   spawn "pcmanfm")
     , ("M-s",            spawn "firefox")
     , ("M-e e",          spawn $ "emacsclient -c -e \"(set-frame-parameter (selected-frame) 'alpha-background 0.85)\"")
+    , ("M-x p",            spawn "keepass -auto-type-selected")
+    , ("M-x 1",            spawn "echo 10 | sudo tee /sys/class/backlight/acpi_video0/brightness")
+    , ("M-x 2",            spawn "echo 15 | sudo tee /sys/class/backlight/acpi_video0/brightness")
+    , ("M-x 3",            spawn "echo 20 | sudo tee /sys/class/backlight/acpi_video0/brightness")
     -- From Imported Libraries
     , ("M-b",            sendMessage ToggleStruts)
     , ("M-f",            gotoMenu)
@@ -114,5 +115,5 @@ main = do
                         where role = stringProperty "WM_WINDOW_ROLE"
 
 myBorderWidth = 3
-myFocusedBorderColor = "#1f0fc8"
+myFocusedBorderColor = "red"
 myNormalBorderColor = "grey"
