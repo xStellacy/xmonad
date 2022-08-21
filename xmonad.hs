@@ -31,13 +31,12 @@ myLayouts = tiled
      delta   = 3/100
 
 
-myTitleColor     = "white" -- color of window title
-myTitleLength    = 80 -- truncate window title to this length
-myCurrentWSColor = "#14bbd8" -- color of active workspace
-myVisibleWSColor = "white" -- color of inactive workspace
-myUrgentWSColor  = "red" -- color of workspace with 'urgent' window
+myTitleColor     = "white"      -- color of window title
+myTitleLength    = 80           -- truncate window title to this length
+myCurrentWSColor = "#14bbd8"    -- color of active workspace
+myVisibleWSColor = "white"      -- color of inactive workspace
+myUrgentWSColor  = "red"        -- color of workspace with 'urgent' window
 myHiddenNoWindowsWSColor = "white"
-
 
 
 --WORKSPACES
@@ -50,6 +49,7 @@ myWorkspaces = clickable . (map xmobarEscape) $ ["1", "2", "3", "4", "5", "6", "
     where
                clickable l = [ "<action=xdotool key super+" ++ show (n) ++ ">" ++ ws ++ "</action>" | (i,ws) <- zip [1, 2, 3, 4, 5, 6, 7, 8, 9] l, let n = i ]
 
+
 myKeys :: [([Char], X ())]
 myKeys =
   -- Commands
@@ -58,15 +58,17 @@ myKeys =
     , ("M--"  ,          spawn "pamixer --allow-boost -d 5")
     , ("M-=",            spawn "pamixer --allow-boost -i 5")
     , ("M-p", unGrab *>  spawn "rofi -show run")
-    , ("<Print>",        spawn $ "~/scripts/screenshot.sh")
+    , ("<Print>",        spawn "~/scripts/screenshot.sh")
     , ("M-c",            spawn "alacritty -e ~/scripts/clipboard.sh")
     , ("M-S-<Return>",   spawn "pcmanfm")
     , ("M-s",            spawn "firefox")
-    , ("M-e e",          spawn $ "emacsclient -c -e \"(set-frame-parameter (selected-frame) 'alpha-background 0.85)\"")
-    , ("M-x p",            spawn "keepass -auto-type-selected")
-    , ("M-x 1",            spawn "echo 10 | sudo tee /sys/class/backlight/acpi_video0/brightness")
-    , ("M-x 2",            spawn "echo 15 | sudo tee /sys/class/backlight/acpi_video0/brightness")
-    , ("M-x 3",            spawn "echo 20 | sudo tee /sys/class/backlight/acpi_video0/brightness")
+    , ("<Scroll_lock>",  spawn "~/scripts/recordvideo.sh")
+    , ("<Pause>",        spawn "~/scripts/endvideo.sh")
+    , ("M-e e",          spawn "emacsclient -c -e \"(set-frame-parameter (selected-frame) 'alpha-background 0.85)\"")
+    , ("M-x p",          spawn "keepass -auto-type-selected")
+    , ("M-x 1",          spawn "echo 10 | sudo tee /sys/class/backlight/acpi_video0/brightness")
+    , ("M-x 2",          spawn "echo 15 | sudo tee /sys/class/backlight/acpi_video0/brightness")
+    , ("M-x 3",          spawn "echo 20 | sudo tee /sys/class/backlight/acpi_video0/brightness")
     -- From Imported Libraries
     , ("M-b",            sendMessage ToggleStruts)
     , ("M-f",            gotoMenu)
@@ -108,12 +110,13 @@ main = do
                             , ppHidden  = wrap """"
                             , ppHiddenNoWindows = xmobarColor myHiddenNoWindowsWSColor ""
                             , ppUrgent  = xmobarColor myUrgentWSColor ""
-                            , ppSep = "  "
-                            , ppWsSep = "  "                
-                            , ppLayout = const "<fc=#bc1fFF>|</fc>"
+                            , ppSep     = "  "
+                            , ppWsSep   = "  "                
+                            , ppLayout  = const "<fc=#bc1fFF>|</fc>"
 }               } `additionalKeysP` myKeys
                         where role = stringProperty "WM_WINDOW_ROLE"
 
 myBorderWidth = 3
+--myFocusedBorderColor = "#1f0fc8"
 myFocusedBorderColor = "red"
 myNormalBorderColor = "grey"
