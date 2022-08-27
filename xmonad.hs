@@ -22,8 +22,7 @@ import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.SetWMName
 import qualified XMonad.StackSet as W
 import XMonad.Hooks.ManageHelpers
-
-myLayouts = tiled
+myLayouts = smartSpacing 3 $ tiled
   where
      tiled   = Tall nmaster delta ratio
      nmaster = 1
@@ -33,11 +32,10 @@ myLayouts = tiled
 
 myTitleColor     = "white"      -- color of window title
 myTitleLength    = 80           -- truncate window title to this length
-myCurrentWSColor = "#14bbd8"    -- color of active workspace
+myCurrentWSColor = "#for"    -- color of active workspace
 myVisibleWSColor = "white"      -- color of inactive workspace
 myUrgentWSColor  = "red"        -- color of workspace with 'urgent' window
 myHiddenNoWindowsWSColor = "white"
-
 
 --WORKSPACES
 xmobarEscape = concatMap doubleLts
@@ -45,7 +43,7 @@ xmobarEscape = concatMap doubleLts
           doubleLts x = [x]
 
 myWorkspaces :: [String]
-myWorkspaces = clickable . (map xmobarEscape) $ ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+myWorkspaces = clickable . (map xmobarEscape) $ [" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", " 9 "]
     where
                clickable l = [ "<action=xdotool key super+" ++ show (n) ++ ">" ++ ws ++ "</action>" | (i,ws) <- zip [1, 2, 3, 4, 5, 6, 7, 8, 9] l, let n = i ]
 
@@ -69,12 +67,15 @@ myKeys =
     , ("M-x 1",          spawn "echo 10 | sudo tee /sys/class/backlight/acpi_video0/brightness")
     , ("M-x 2",          spawn "echo 15 | sudo tee /sys/class/backlight/acpi_video0/brightness")
     , ("M-x 3",          spawn "echo 20 | sudo tee /sys/class/backlight/acpi_video0/brightness")
+    , ("M-x w",          spawn "~/scripts/randomwallpaper.sh")
+    , ("M-x r",          spawn "~/scripts/removewallpaper.sh")
+    , ("M-x c",          spawn "~/scripts/xmobarwal.sh")
     -- From Imported Libraries
     , ("M-b",            sendMessage ToggleStruts)
     , ("M-f",            gotoMenu)
     , ("M-C-f",          bringMenu)        
-    , ("M-S-=",          incWindowSpacing 4)
-    , ("M-S--",          decWindowSpacing 4)
+    , ("M-S-=",          incWindowSpacing 1)
+    , ("M-S--",          decWindowSpacing 1)
     , ("M-S-.",          shiftToNext)
     , ("M-S-,",          shiftToPrev)
     , ("M-,",            DO.moveTo Prev HiddenNonEmptyWS)
@@ -87,7 +88,8 @@ main :: IO ()
 main = do
     xmproc <- spawnPipe  "xmobar"
     xmonad $ ewmhFullscreen $ ewmh $ docks $ def
-      { layoutHook      =    smartSpacing 2 $ avoidStruts $ smartBorders $ myLayouts
+--spacingWithEdge 5 
+      { layoutHook      =    smartSpacingWithEdge 4 $ avoidStruts $ smartBorders $ myLayouts
       , focusedBorderColor = myFocusedBorderColor
       , startupHook = setWMName "LG3D"
       , borderWidth     =    myBorderWidth
@@ -102,21 +104,21 @@ main = do
 
       , modMask         =    mod4Mask
       , logHook         =    dynamicLogWithPP $ xmobarPP
-      
-                            { ppOutput  = hPutStrLn xmproc
-                            , ppTitle   = xmobarColor "white" "" . shorten 35
-                            , ppCurrent = xmobarColor myCurrentWSColor "" . wrap "<fc=#14bbd8><</fc>"">"
-                            , ppVisible = xmobarColor myVisibleWSColor "" . wrap """"
-                            , ppHidden  = wrap """"
-                            , ppHiddenNoWindows = xmobarColor myHiddenNoWindowsWSColor ""
+                             { ppOutput  = hPutStrLn xmproc
+                            , ppTitle   = xmobarColor "#for" "" . shorten 35
+--                            , ppTitle   = wrap "<fc=#for>""</fc>" . shorten 35
+                            , ppCurrent = wrap "<box type=Full color=#bac><fc=#for,#bac>""</fc></box>"
+                            , ppVisible = wrap """"
+                            , ppHidden  = wrap "<box type=Bottom width=2 color=#bac><box type=Full color=#for><fc=#bac,#for>""</fc></box></box>"
+                            --, ppHiddenNoWindows = xmobarColor myHiddenNoWindowsWSColor ""
+                            , ppHiddenNoWindows  = wrap "<box type=Full color=#for><fc=#bac,#for>""</fc></box>"
                             , ppUrgent  = xmobarColor myUrgentWSColor ""
-                            , ppSep     = "  "
-                            , ppWsSep   = "  "                
-                            , ppLayout  = const "<fc=#bc1fFF>|</fc>"
+                            , ppSep     = ""
+                            , ppWsSep   = ""                
+                            , ppLayout  = const "<box type=full color=#for><fc=#bac,#for> []= </fc></box> "
 }               } `additionalKeysP` myKeys
                         where role = stringProperty "WM_WINDOW_ROLE"
 
-myBorderWidth = 3
---myFocusedBorderColor = "#1f0fc8"
-myFocusedBorderColor = "red"
-myNormalBorderColor = "grey"
+myBorderWidth = 2
+myFocusedBorderColor = "#bac"
+myNormalBorderColor = "#for"
