@@ -1,0 +1,67 @@
+-- Thanks to krive001 to share the code of xmobar
+-- https://github.com/krive001/xmonad-xmobar
+
+Config {
+    font = "xft:JetBrains Mono:size=10:style=Regular",
+    additionalFonts = ["xft:Noto Sans LGC:size=10:style=Bold","xft:FontAwesome:style=Regular:size=12"]
+   , bgColor          = "#bac"
+   , fgColor          = "#for"
+   , position         = TopW L 100
+   , textOffset       = -1
+   , iconOffset       = -8
+   , alpha            = 255
+   , border           = NoBorder
+   , borderWidth      = 0
+   , borderColor      = "#FFFFFF"
+   , lowerOnStart     = True
+   , hideOnStart      = False
+   , allDesktops      = True
+   , overrideRedirect = True
+   , pickBroadest     = True
+   , persistent       = True
+   , sepChar          = "%"
+   , alignSep         = "}{"
+   , template         = "<fn=0><action=button=4><action=button=5>%UnsafeStdinReader% </action></action></fn>}<action=`python ~/.local/bin/traycalendar.py --no-tray --toggle --top 24 --left 530` button=1>%date%</action>{<box type=Full color=#for><box type=Full color=#bac><fc=#bac,#for>[ <fc=#bac,#for><fn=0></fn>UPT:</fc> %uptime%] [%memory% ] [<fc=#bac,#for><fn=0> VOL:</fn></fc> %XVol% ]</fc></box></box>"
+   , commands         =
+      [ Run MultiCpu                              [ "--template" ," CPU: <total>%"
+                                                , "--Low"      , "50"        -- units: %
+                                                , "--High"     , "85"        -- units: %
+                                                , "--low"      , "#bac"
+                                                , "--normal"   , "#bac"
+                                                , "--high"     , "#fd0537"
+                                                ] 100
+
+      , Run CoreTemp                            [ "--template" , "<fc=#ff0005,#bac><fn=0>  </fn></fc><fc=green></fc><core0> °C"
+                                                , "--Low"      , "2"         -- units: °C
+                                                , "--High"     , "80"        -- units: °C
+                                                , "--low"      , "#bac"
+                                                , "--normal"   , "#bac"
+                                                , "--high"     , "#fd0537"
+                                                ] 10
+
+      , Run Memory                              [ "--template" ,"<fc=#bac,#for><fn=0> MEM: </fn></fc><fc=white></fc><usedratio>%"
+                                                ] 10
+
+
+
+      , Run Com "/bin/bash" ["-c", "~/scripts/getvol.sh"]  "XVol" 1
+
+
+      , Run Kbd                                [ ("be" , "<fc=#FFFFFF>BE</fc>")
+                                                , ("us" , "<fc=#FFFFFF>US</fc>")]
+
+      , Run UnsafeStdinReader
+
+	  , Run Com "/bin/bash" ["-c",  "XMKupdate"] "update" 600
+
+      , Run Date "<fn=0><fc=#ff0004></fc></fn> %a %d %b - %H:%M" "date" 60
+	  
+	  , Run XPropertyLog "_XMONAD_TRAYPAD"
+	  
+      , Run Uptime ["-t", "<hours>h:<minutes>m "] 360
+
+
+            ]
+      
+
+}
