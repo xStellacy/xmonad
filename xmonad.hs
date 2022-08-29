@@ -20,7 +20,6 @@ import XMonad.Hooks.UrgencyHook
 import XMonad.Actions.WindowBringer
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.SetWMName
-import XMonad.Layout.DwmStyle
 import qualified XMonad.StackSet as W
 import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.Cross
