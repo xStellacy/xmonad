@@ -20,19 +20,23 @@ import XMonad.Hooks.UrgencyHook
 import XMonad.Actions.WindowBringer
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.SetWMName
+import XMonad.Layout.DwmStyle
 import qualified XMonad.StackSet as W
 import XMonad.Hooks.ManageHelpers
-myLayouts = smartSpacing 3 $ tiled
+import XMonad.Layout.Cross
+import XMonad.Layout.ResizableTile
+
+myLayouts = tiled |||
+            simpleCross
   where
-     tiled   = Tall nmaster delta ratio
+     tiled   = ResizableTall nmaster delta ratio[]
      nmaster = 1
      ratio   = 1/2
      delta   = 3/100
 
-
 myTitleColor     = "white"      -- color of window title
 myTitleLength    = 80           -- truncate window title to this length
-myCurrentWSColor = "#for"    -- color of active workspace
+myCurrentWSColor = "#for"       -- color of active workspace
 myVisibleWSColor = "white"      -- color of inactive workspace
 myUrgentWSColor  = "red"        -- color of workspace with 'urgent' window
 myHiddenNoWindowsWSColor = "white"
@@ -46,7 +50,6 @@ myWorkspaces :: [String]
 myWorkspaces = clickable . (map xmobarEscape) $ [" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", " 9 "]
     where
                clickable l = [ "<action=xdotool key super+" ++ show (n) ++ ">" ++ ws ++ "</action>" | (i,ws) <- zip [1, 2, 3, 4, 5, 6, 7, 8, 9] l, let n = i ]
-
 
 myKeys :: [([Char], X ())]
 myKeys =
@@ -78,6 +81,8 @@ myKeys =
     , ("M-S--",          decWindowSpacing 1)
     , ("M-S-.",          shiftToNext)
     , ("M-S-,",          shiftToPrev)
+    , ("M-M1-j",         sendMessage MirrorShrink)
+    , ("M-M1-k",         sendMessage MirrorExpand)
     , ("M-,",            DO.moveTo Prev HiddenNonEmptyWS)
     , ("M-.",            DO.moveTo Next HiddenNonEmptyWS)    
     , ("M-m",            dwmpromote)
@@ -89,9 +94,9 @@ main = do
     xmproc <- spawnPipe  "xmobar"
     xmonad $ ewmhFullscreen $ ewmh $ docks $ def
 --spacingWithEdge 5 
-      { layoutHook      =    smartSpacingWithEdge 4 $ avoidStruts $ smartBorders $ myLayouts
+      { layoutHook      =    smartSpacing 8 $ avoidStruts $ smartBorders $ myLayouts
       , focusedBorderColor = myFocusedBorderColor
-      , startupHook = setWMName "LG3D"
+      , startupHook     = setWMName "LG3D"
       , borderWidth     =    myBorderWidth
       , normalBorderColor =  myNormalBorderColor
       , workspaces      =    myWorkspaces
@@ -106,11 +111,9 @@ main = do
       , logHook         =    dynamicLogWithPP $ xmobarPP
                              { ppOutput  = hPutStrLn xmproc
                             , ppTitle   = xmobarColor "#for" "" . shorten 35
---                            , ppTitle   = wrap "<fc=#for>""</fc>" . shorten 35
                             , ppCurrent = wrap "<box type=Full color=#bac><fc=#for,#bac>""</fc></box>"
                             , ppVisible = wrap """"
                             , ppHidden  = wrap "<box type=Bottom width=2 color=#bac><box type=Full color=#for><fc=#bac,#for>""</fc></box></box>"
-                            --, ppHiddenNoWindows = xmobarColor myHiddenNoWindowsWSColor ""
                             , ppHiddenNoWindows  = wrap "<box type=Full color=#for><fc=#bac,#for>""</fc></box>"
                             , ppUrgent  = xmobarColor myUrgentWSColor ""
                             , ppSep     = ""
