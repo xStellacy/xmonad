@@ -1,4 +1,5 @@
 import XMonad
+import System.IO
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Actions.DwmPromote (dwmpromote)
 import XMonad.Hooks.ManageDocks (ToggleStruts (..),  avoidStruts, docks)
@@ -7,7 +8,6 @@ import XMonad.Layout.NoBorders (noBorders, smartBorders, hasBorder)
 import XMonad.Layout.Spacing (smartSpacing, incWindowSpacing, decWindowSpacing)
 import XMonad.Actions.CycleWS
 import XMonad.Hooks.DynamicLog (dynamicLogWithPP, ppLayout, ppOutput, ppTitle, ppCurrent, ppVisible, ppHidden, ppHiddenNoWindows, ppUrgent, ppSep, ppWsSep, filterOutWsPP, wrap, shorten, xmobarColor, xmobarPP)
-import System.IO
 import XMonad.Actions.SinkAll (sinkAll)
 import XMonad.Hooks.EwmhDesktops (ewmh, addEwmhWorkspaceSort, ewmhFullscreen)
 import XMonad.Hooks.SetWMName (setWMName)
@@ -64,13 +64,14 @@ myKeys =
     , ("M-p",                       spawn "exit")
     , ("M-r",                       spawn "rofi -config .cache/wal/colors-rofi-dark.rasi -show run")
     , ("<Print>",                   spawn "~/bin/screenshot.sh")
-    , ("M-x w",                     spawn "~/bin/randomwallpaper.sh")
+    , ("M-x w",                     spawn "st -c chooseWallpaper ~/bin/randomwallpaper.sh")
     , ("M-x r",                     spawn "~/bin/removewallpaper.sh")
     , ("M-x c",                     spawn "~/bin/xmobarwal.sh")
     , ("<Scroll_lock>",             spawn "~/bin/recordvideo.sh")
     , ("M-<Print>",                 spawn "~/bin/recordvideo.sh")
     , ("M-S-<Print>",               spawn "~/bin/endvideo.sh")
     , ("M-x t",                     spawn "~/bin/task.sh")
+    , ("M-x e",                     spawn "pkill emacs; ~/.clone/emacs/src/emacs --daemon")
     -- FROM IMPORTED LIBRARIES
     , ("M-b",                       sendMessage ToggleStruts)
     , ("M-S-=",                     incWindowSpacing 1)
@@ -134,6 +135,7 @@ main = do
                             , className =? "Firefox" -->         hasBorder False
                             , className =? "htop" -->            doRectFloat (W.RationalRect 0 0 1 1)
                             , className =? "terminal" -->        doRectFloat (W.RationalRect 0 0 1 1)
+                            , className =? "chooseWallpaper" --> doRectFloat (W.RationalRect 0 0 0 0)
                             , role =? "page-info" -->            doFloat
                             , role =? "GtkFileChooserDialog" --> doSink
                             , isDialog -->                       doCenterFloat
